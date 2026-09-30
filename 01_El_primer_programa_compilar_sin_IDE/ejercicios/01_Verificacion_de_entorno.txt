@@ -1,0 +1,5 @@
+Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36257 for x86
+(C) Microsoft Corporation. Todos los derechos reservados.
+
+cl : Línea de comandos warning D9002 : se omite la opción desconocida '-v'
+cl : Línea de comandos error D8003 : falta el nombre del archivo de código fuente
