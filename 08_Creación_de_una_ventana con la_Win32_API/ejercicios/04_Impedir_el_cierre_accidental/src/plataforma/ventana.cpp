@@ -1,0 +1,72 @@
+// [CAP.8] ventana.cpp - Implementacion de la clase Ventana
+#include "ventana.h"
+#include <cstdio>
+
+const char* Ventana::NOMBRE_CLASE = "GameEngineWindowClass"; // [CAP.8]
+
+Ventana::Ventana(HINSTANCE instanciaApp, const char* titulo, int ancho, int alto, int modoMostrar)
+    : hwnd(nullptr), instancia(instanciaApp) {
+
+    WNDCLASSEXA wc = {};
+    wc.cbSize = sizeof(WNDCLASSEXA);
+    wc.lpfnWndProc = procedimientoVentana;
+    wc.hInstance = instancia;
+    wc.lpszClassName = NOMBRE_CLASE;
+    wc.hIcon = LoadIcon(NULL, IDI_APPLICATION); // [EJ.3] Icono de la ventana
+    wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION); // [EJ.3] Icono pequeño de la ventana
+    wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+
+    RegisterClassExA(&wc);
+
+    hwnd = CreateWindowExA(
+        0,
+        NOMBRE_CLASE,
+        titulo, // [CAP.8] El titulo se recibe como parametro: ver el apartado 8.7
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT,
+        ancho, alto,
+        NULL, NULL,
+        instancia,
+        NULL
+    );
+
+    if (hwnd == NULL) {
+        printf("[Ventana] Error: no se pudo crear la ventana.\n");
+        return;
+    }
+
+    ShowWindow(hwnd, modoMostrar);
+}
+
+Ventana::~Ventana() {
+    if (hwnd != nullptr) {
+        DestroyWindow(hwnd);          // [CAP.8] Libera el recurso HWND
+    }
+    UnregisterClassA(NOMBRE_CLASE, instancia); // [CAP.8] Libera el recurso de la clase registrada
+}
+
+void Ventana::ejecutarBucleDeMensajes() {
+    MSG mensaje;
+    while (GetMessage(&mensaje, NULL, 0, 0)) {
+        TranslateMessage(&mensaje);
+        DispatchMessage(&mensaje);
+    }
+}
+
+LRESULT CALLBACK Ventana::procedimientoVentana(HWND hwnd, UINT mensaje, WPARAM wParam, LPARAM lParam) {
+    switch (mensaje) {
+        // [EJ.4] Manejo de mensajes de la ventana
+        case WM_CLOSE:
+            printf("¿Seguro que quieres cerrar? (Este ejercicio siempre cierra, pero imagina aquí un cuadro de confirmación)\n");
+            DestroyWindow(hwnd);
+            return 0;
+
+        case WM_DESTROY:
+            PostQuitMessage(0);
+            return 0;
+
+        default:
+            return DefWindowProcA(hwnd, mensaje, wParam, lParam);
+    }
+}
